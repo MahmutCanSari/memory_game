@@ -1,12 +1,19 @@
 import pygame
 import random
 import math
+import json
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 800))
 clock = pygame.time.Clock()
 fnt_1 = pygame.font.SysFont('Arial', 50)
 fnt_2 = pygame.font.SysFont('Arial', 35)
+fnt_3 = pygame.font.SysFont('Arial', 25)
+
+
+
+with open('user_data.json', 'r') as file:
+    data = json.load(file)
 
 
 class Object:
@@ -84,17 +91,29 @@ while running:
     if scene == 0:
         txt_1 = fnt_2.render("Start", True, (0, 0, 0))
         txt_2 = fnt_1.render("The Game!", True, (255, 255, 255))
-        rect_1 = pygame.rect.Rect(screen.get_width() / 10, screen.get_height() / 3, txt_1.get_width() * 2,
-                                  txt_1.get_height() + 10)
+        txt_3 = fnt_3.render(f"high score: {data["high_score"]} ", True, (255, 255, 255))
+        txt_4 = fnt_2.render("Settings", True, (0, 0, 0))
+        rect_1 = pygame.rect.Rect(screen.get_width() / 10, screen.get_height() / 3,
+                                  txt_1.get_width() * 2,txt_1.get_height() + 10)
+        rect_3 = pygame.rect.Rect(screen.get_width() / 10, 2 * txt_4.get_height() + screen.get_height() / 3,
+                                  txt_4.get_width() * 2,txt_4.get_height() + 10)
+
 
         pygame.draw.rect(screen, (255, 255, 255), rect_1)
-        screen.blit(txt_1, (15 + screen.get_width() / 10, 5 + screen.get_height() / 3))
-        screen.blit(txt_2, ((screen.get_width() / 2) - txt_2.get_width() / 2, screen.get_height() / 10))
+        pygame.draw.rect(screen, (255, 255, 255), rect_3)
+        screen.blit(txt_1,(15 + screen.get_width() / 10, 5 + screen.get_height() / 3))
+        screen.blit(txt_2,((screen.get_width() / 2) - txt_2.get_width() / 2, screen.get_height() / 10))
+        screen.blit(txt_3,((screen.get_width()/2) - txt_3.get_width() / 2, screen.get_height() / 6))
+        screen.blit(txt_4,(rect_3[0]+15,rect_3[1]+5))
 
         if rect_1.collidepoint(mouse):
             if mouse_press[0] == 1:
                 scene = 1
                 scene_1_start = True
+        if rect_3.collidepoint(mouse):
+            if mouse_press[0] == 1:
+                scene = 2
+
     if scene == 1:
         if scene_1_score:
             temp_score = 0
@@ -114,6 +133,10 @@ while running:
             pygame.draw.rect(screen, (255, 255, 255), rect_2)
             screen.blit(txt_1_3, ((screen.get_width() / 2) - txt_1_3.get_width() / 2,
                                   (8 * screen.get_height() / 10) - txt_1_3.get_height() + 5))
+
+            if temp_score > data["high_score"]:
+                data["high_score"] = temp_score
+
             if rect_2.collidepoint(mouse):
                 if mouse_press[0] == 1:
                     scene_1_start = True
@@ -142,7 +165,10 @@ while running:
                 scene_1_prep = False
 
         if scene_1_start:
-            obj_count = random.randint(3, 5)
+            if data["obj_count"] == -1:
+                obj_count = random.randint(3, 5)
+            else:
+                obj_count = data["obj_count"]
             objects = []
             for i in range(obj_count):
                 objects.append(Object())
@@ -150,10 +176,64 @@ while running:
             scene_1_prep = True
             scene_1_start = False
 
+    if scene == 2:
+        txt_2_1 = fnt_1.render("Settings", True, (255, 255, 255))
+        txt_2_2 = fnt_2.render("Object count: ", True, (255, 255, 255))
+        txt_2_3 = fnt_2.render("3", True, (255, 255, 255))
+        txt_2_4 = fnt_2.render("4", True, (255, 255, 255))
+        txt_2_5 = fnt_2.render("5", True, (255, 255, 255))
+        txt_2_6 = fnt_2.render("random", True, (255, 255, 255))
+        txt_2_7 = fnt_2.render("Return", True, (255, 255, 255))
+
+        rect_2_1 = pygame.rect.Rect((screen.get_width() / 12) + txt_2_1.get_width()+30,
+                                    screen.get_height() / 5,txt_2_3.get_width(),txt_2_3.get_height() )
+        rect_2_2 = pygame.rect.Rect(rect_2_1[0]+30,screen.get_height()/5,txt_2_4.get_width(),txt_2_4.get_height())
+        rect_2_3 = pygame.rect.Rect(rect_2_2[0]+30,screen.get_height()/5,txt_2_5.get_width(),txt_2_5.get_height())
+        rect_2_4 = pygame.rect.Rect(rect_2_3[0]+30,screen.get_height()/5,txt_2_6.get_width(),txt_2_6.get_height())
+        rect_2_5 = pygame.rect.Rect((screen.get_width()/2)-txt_2_7.get_width()/2,8*screen.get_height()/10,txt_2_7.get_width(),txt_2_7.get_height())
+
+        screen.blit(txt_2_1, ((screen.get_width() / 2) - txt_2_1.get_width() / 2,screen.get_height() / 10))
+        screen.blit(txt_2_2, (screen.get_width() / 12 , screen.get_height() / 5))
+        screen.blit(txt_2_3, (rect_2_1[0],rect_2_1[1]))
+        screen.blit(txt_2_4, (rect_2_2[0],rect_2_2[1]))
+        screen.blit(txt_2_5, (rect_2_3[0],rect_2_3[1]))
+        screen.blit(txt_2_6, (rect_2_4[0],rect_2_4[1]))
+        screen.blit(txt_2_7, (rect_2_5[0],rect_2_5[1]))
+
+        if rect_2_1.collidepoint(mouse):
+            if mouse_press[0] == 1:
+                data["obj_count"] = 3
+        elif rect_2_2.collidepoint(mouse):
+            if mouse_press[0] == 1:
+                data["obj_count"] = 4
+        elif rect_2_3.collidepoint(mouse):
+            if mouse_press[0] == 1:
+                data["obj_count"] = 5
+        elif rect_2_4.collidepoint(mouse):
+            if mouse_press[0] == 1:
+                data["obj_count"] = -1
+        elif rect_2_5.collidepoint(mouse):
+            if mouse_press[0] == 1:
+                scene = 0
+
+        if data["obj_count"] == -1:
+            pygame.draw.line(screen, (255, 255, 255), (rect_2_4[0] , rect_2_4[1]+rect_2_4[3]), (rect_2_4[0]+rect_2_4[2], rect_2_4[1]+rect_2_4[3]))
+        elif data["obj_count"] == 3:
+            pygame.draw.line(screen, (255, 255, 255), (rect_2_1[0] , rect_2_1[1]+rect_2_1[3]), (rect_2_1[0]+rect_2_1[2], rect_2_1[1]+rect_2_1[3]))
+        elif data["obj_count"] == 4:
+            pygame.draw.line(screen, (255, 255, 255), (rect_2_2[0] , rect_2_2[1]+rect_2_2[3]), (rect_2_2[0]+rect_2_2[2], rect_2_2[1]+rect_2_2[3]))
+        elif data["obj_count"] == 5:
+            pygame.draw.line(screen, (255, 255, 255), (rect_2_3[0] , rect_2_3[1]+rect_2_3[3]), (rect_2_3[0]+rect_2_3[2], rect_2_3[1]+rect_2_3[3]))
+
+
+
     clk += 1
     if clk == 60:
         clk = 0
         sec += 1
     pygame.display.flip()
     clock.tick(60)
+
+with open('user_data.json', 'w') as file:
+    json.dump(data, file)
 pygame.quit()
